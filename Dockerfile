@@ -1,4 +1,3 @@
-# ベースイメージ
 FROM php:8.2-fpm
 
 # 必要なパッケージのインストール
@@ -6,25 +5,25 @@ RUN apt-get update && apt-get install -y \
     git unzip zip libzip-dev libpng-dev libonig-dev libxml2-dev \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
 
-# Composerをインストール
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 作業ディレクトリ設定
+# 作業ディレクトリ
 WORKDIR /var/www/html
 
 # アプリケーションファイルをコピー
 COPY . .
 
-# Composerで依存関係をインストール
+# Laravel 依存インストール
 RUN composer install --no-dev --optimize-autoloader
 
-# パーミッション設定（必要に応じて）
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Laravelのstorage権限
+RUN mkdir -p bootstrap/cache storage/logs \
+    && chown -R www-data:www-data bootstrap storage \
+    && chmod -R 775 bootstrap storage
 
-# 8000ポートを開放
+# ポートを開ける
 EXPOSE 8000
 
-RUN chown -R www-data:www-data storage bootstrap/cache
-
-# Laravelのビルトインサーバ起動
+# Laravelサーバ起動
 CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT}"]
