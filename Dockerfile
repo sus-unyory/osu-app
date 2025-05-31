@@ -24,5 +24,7 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # 8000ポートを開放
 EXPOSE 8000
 
+RUN chown -R www-data:www-data storage bootstrap/cache
+
 # Laravelのビルトインサーバ起動
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT}"]
